@@ -1,0 +1,142 @@
+import { Application, Request, Response } from "express";
+import express from "express";
+import { pool } from "./db";
+const app: Application = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.text());
+
+app.post("/api/v1/users", async (req: Request, res: Response) => {
+  try {
+    const { name, age, email, password } = req.body;
+    const result = await pool.query(
+      `
+  INSERT INTO users (name, email, password, age) VALUES
+  ($1, $2, $3, $4) RETURNING *
+
+  `,
+      [name, email, password, age],
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "user created successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating user",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/api/v1/users", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM users`);
+    res.status(200).json({
+      success: true,
+      message: "users fetched successfully",
+      data: result.rows,
+    });
+  } catch (error: any) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching users",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/api/v1/users/:id", async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
+    console.log(result.rows[0]);
+    res.status(200).json({
+      success: true,
+      message: "user fetched successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user",
+      error: error.message,
+    });
+  }
+});
+
+app.put("/api/v1/users/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, age, email, password } = req.body;
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET
+      name = COALESCE ($1, name),
+      age = COALESCE ($2, age),
+      email = COALESCE ($3, email),
+      password = COALESCE ($4, password),
+      updated_at = NOW()
+      WHERE id = $5
+      RETURNING *;
+      `,
+      [name ?? null, age ?? null, email ?? null, password ?? null, id],
+    );
+    console.log(result.rows[0]);
+    res.status(200).json({
+      success: true,
+      message: "user updated successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.error("Error updating user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating user",
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/api/v1/users/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      `
+      DELETE FROM users
+      WHERE id = $1
+    `,
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting user",
+      error: error.message,
+    });
+  }
+});
+
+export default app;
