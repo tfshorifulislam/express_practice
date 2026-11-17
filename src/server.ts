@@ -1,33 +1,8 @@
 import { Application, Request, Response } from "express";
-import { Pool } from "pg";
 import express from "express";
 import config from "./config";
+import { initDb } from "./db";
 const app: Application = express();
-const pool = new Pool({
-  connectionString: config.connection_string,
-});
-// console.log(pool);
-
-const initDb = async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users(
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255),
-      age INT,
-      email VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL,
-      is_Active BOOLEAN DEFAULT true,
-      created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
-      );
-      `);
-
-    console.log("Connected to the database successfully");
-  } catch (error) {
-    console.log("Error connecting to the database:", error);
-  }
-};
 
 initDb();
 
@@ -166,10 +141,6 @@ app.delete("/api/v1/users/:id", async (req: Request, res: Response) => {
     });
   }
 });
-
-// app.get("/", (req: Request, res: Response) => {
-//   res.send("Hello World!");
-// });
 
 app.listen(config.port, () => {
   console.log(`Example app listening on port ${config.port}`);
