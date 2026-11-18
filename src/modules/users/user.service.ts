@@ -47,9 +47,22 @@ const usesrUpdateFromDB = async (payload: any, id: string) => {
 
   return result;
 };
+
+const userDeleteFromDB = async (id: string) => {
+  const result = await pool.query(
+    `
+      DELETE FROM users
+      WHERE id = $1
+    `,
+    [id],
+  );
+  return result;
+};
+
 export const userService = {
   createUserIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   usesrUpdateFromDB,
+  userDeleteFromDB,
 };
