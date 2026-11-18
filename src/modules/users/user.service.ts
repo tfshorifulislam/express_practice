@@ -26,8 +26,30 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
+// update user from db
+const usesrUpdateFromDB = async (payload: any, id: string) => {
+  const { name, age, email, password } = payload;
+  const result = await pool.query(
+    `
+        UPDATE users
+        SET
+        name = COALESCE ($1, name),
+        age = COALESCE ($2, age),
+        email = COALESCE ($3, email),
+        password = COALESCE ($4, password),
+        updated_at = NOW()
+        WHERE id = $5
+        RETURNING *;
+        `,
+    [name ?? null, age ?? null, email ?? null, password ?? null, id],
+  );
+  console.log(result.rows[0]);
+
+  return result;
+};
 export const userService = {
   createUserIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
+  usesrUpdateFromDB,
 };

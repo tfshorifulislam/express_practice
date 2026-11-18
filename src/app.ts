@@ -10,40 +10,6 @@ app.use(express.text());
 
 app.use("/api/v1/users", userRoute);
 
-app.put("/api/v1/users/:id", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { name, age, email, password } = req.body;
-    const result = await pool.query(
-      `
-      UPDATE users
-      SET
-      name = COALESCE ($1, name),
-      age = COALESCE ($2, age),
-      email = COALESCE ($3, email),
-      password = COALESCE ($4, password),
-      updated_at = NOW()
-      WHERE id = $5
-      RETURNING *;
-      `,
-      [name ?? null, age ?? null, email ?? null, password ?? null, id],
-    );
-    console.log(result.rows[0]);
-    res.status(200).json({
-      success: true,
-      message: "user updated successfully",
-      data: result.rows[0],
-    });
-  } catch (error: any) {
-    console.error("Error updating user:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error updating user",
-      error: error.message,
-    });
-  }
-});
-
 app.delete("/api/v1/users/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
