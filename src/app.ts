@@ -1,76 +1,14 @@
 import { Application, Request, Response } from "express";
 import express from "express";
 import { pool } from "./db";
+import { userRoute } from "./modules/users/user.route";
 const app: Application = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text());
 
-app.post("/api/v1/users", async (req: Request, res: Response) => {
-  try {
-    const { name, age, email, password } = req.body;
-    const result = await pool.query(
-      `
-  INSERT INTO users (name, email, password, age) VALUES
-  ($1, $2, $3, $4) RETURNING *
-
-  `,
-      [name, email, password, age],
-    );
-
-    res.status(201).json({
-      success: true,
-      message: "user created successfully",
-      data: result.rows[0],
-    });
-  } catch (error: any) {
-    console.error("Error creating user:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating user",
-      error: error.message,
-    });
-  }
-});
-
-app.get("/api/v1/users", async (req: Request, res: Response) => {
-  try {
-    const result = await pool.query(`SELECT * FROM users`);
-    res.status(200).json({
-      success: true,
-      message: "users fetched successfully",
-      data: result.rows,
-    });
-  } catch (error: any) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching users",
-      error: error.message,
-    });
-  }
-});
-
-app.get("/api/v1/users/:id", async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
-    console.log(result.rows[0]);
-    res.status(200).json({
-      success: true,
-      message: "user fetched successfully",
-      data: result.rows[0],
-    });
-  } catch (error: any) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching user",
-      error: error.message,
-    });
-  }
-});
+app.use("/api/v1/users", userRoute);
 
 app.put("/api/v1/users/:id", async (req: Request, res: Response) => {
   try {
