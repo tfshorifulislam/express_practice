@@ -27,7 +27,7 @@ export const initDb = async () => {
         phone VARCHAR(15),
         gender VARCHAR(15),
         created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
+        updated_at TIMESTAMP DEFAULT NOW()
         )
         `);
     console.log("Connected to the database successfully");
