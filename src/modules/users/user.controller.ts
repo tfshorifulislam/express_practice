@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
-import { initDb } from "../../db";
 
 // create user into db
 
@@ -91,6 +90,7 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
+// delete users from db
 const userDelete = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

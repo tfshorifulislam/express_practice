@@ -1,6 +1,7 @@
 import { pool } from "../../db";
 import { Iuser } from "./user.interface";
 
+// user create function;
 const createUserIntoDB = async (payload: Iuser) => {
   const { name, age, email, password } = payload;
   const result = await pool.query(
@@ -15,6 +16,7 @@ const createUserIntoDB = async (payload: Iuser) => {
   return result;
 };
 
+// get all user from db;
 const getAllUsersFromDB = async () => {
   const result = await pool.query(`SELECT * FROM users`);
   return result;
@@ -26,7 +28,7 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
-// update user from db
+// update user from db;
 const usesrUpdateFromDB = async (payload: any, id: string) => {
   const { name, age, email, password } = payload;
   const result = await pool.query(
@@ -48,6 +50,7 @@ const usesrUpdateFromDB = async (payload: any, id: string) => {
   return result;
 };
 
+// delete user from db;
 const userDeleteFromDB = async (id: string) => {
   const result = await pool.query(
     `
